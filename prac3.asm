@@ -13,25 +13,26 @@ encabezadoP2 db 0ah, 'NOMBRE: JESSICA ELIZABETH BOTON PEREZ', 10,13, 'CARNET: 20
 menuOpciones db '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar Juego', 10,13,'2) Cargar Juego', 10,13,'3) Salir', 10,13,10,13,'>','$' 
 
 ;VARIABLES INICIAR JUEGO
-msg1 db 0ah, 0dh, '--------- NUEVO JUEGO ---------', 10,13,10, '$'
-y8 db '8	|', '$'
-y7 db '7	|', '$'
-y6 db '6	|', '$'
-y5 db '5	|', '$'
-y4 db '4	|', '$'
-y3 db '3	|', '$'
-y2 db '2	|', '$'
-y1 db '1	|', '$'
-fn db 'FN|', '$'
+msg1 db 0ah, 0dh, '---------- NUEVO JUEGO ----------', 10,13,10, '$'
+y8 db ' 8	|', '$'
+y7 db ' 7	|', '$'
+y6 db ' 6	|', '$'
+y5 db ' 5	|', '$'
+y4 db ' 4	|', '$'
+y3 db ' 3	|', '$'
+y2 db ' 2	|', '$'
+y1 db ' 1	|', '$'
 fb db 'FB|', '$'
-rn db 'RN|', '$'
+fn db 'FN|', '$'
 rb db 'RB|', '$'
+rn db 'RN|', '$'
 vc db '  |', '$'
-linea db 32,32,32,32,'--------------------------', '$'
-xcord db 0ah, 0dh, 32,32,32,32,32,'A 	B 	C 	D 	E 	F 	G 	H', '$'
+ln db '  	-------------------------', 10,13, '$'
+xcord db 0ah, 0dh, 32,32,32,32,32,32,32,32,'  A  B  C  D  E  F  G  H', '$'
 turnoBlancas db 0ah, 0dh, 'Turno Blancas: ', '$'
 turnoNegras db 0ah, 0dh, 'Turno Negras: ', '$'
-;000->VACIO 	001->F_NEGRA 	011->REINA_NEGRA 	100->F-BLANCA 	110->REINA_BLANCA
+saltoLinea db 0ah, 0dh, '$'
+;000->VACIO 	001->F_BLANCA 	011->REINA_BLANCA 	100->F_NEGRA 	110->REINA_NEGRA
 fila8 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
 fila7 db 000b, 001b, 000b, 001b, 000b, 001b, 000b, 001b
 fila6 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
@@ -40,6 +41,10 @@ fila4 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
 fila3 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b
 fila2 db 100b, 000b, 100b, 000b, 100b, 000b, 100b, 000b
 fila1 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b 
+;DETALLES JUEGO
+turno db 0b
+fila db 0b
+columna db 0b
 
 ;VARIABLES FICHERO
 dia db 3 dup('0')
@@ -53,7 +58,7 @@ bufferEscritura db 200 dup('$')
 handleFichero dw ?
 
 ;VARIABLES CARGAR JUEGO
-separador db 0ah, 0ah, 0dh, '$'
+
 msg2 db 0ah, 0dh, '-------- CARGANDO JUEGO --------', '$'
 
 ;==================== DECLARACION DE CODIGO =============================
@@ -82,11 +87,33 @@ main proc
 
 	INGRESAR:
 		print msg1
-		imprimir SIZEOF fila8, fn, fb, y8, vc, fila8
-		print separador
-		getChar
+		imprimir SIZEOF fila8, fb, fn, y8, vc, fila8, ln, saltoLinea
+		imprimir SIZEOF fila7, fb, fn, y7, vc, fila7, ln, saltoLinea
+		imprimir SIZEOF fila6, fb, fn, y6, vc, fila6, ln, saltoLinea
+		imprimir SIZEOF fila5, fb, fn, y5, vc, fila5, ln, saltoLinea
+		imprimir SIZEOF fila4, fb, fn, y4, vc, fila4, ln, saltoLinea
+		imprimir SIZEOF fila3, fb, fn, y3, vc, fila3, ln, saltoLinea
+		imprimir SIZEOF fila2, fb, fn, y2, vc, fila2, ln, saltoLinea
+		imprimir SIZEOF fila1, fb, fn, y1, vc, fila1, ln, saltoLinea
+		print ln
+		print xcord
+		print saltoLinea
+		cmp turno, 0b
+		je JUG_BLANCAS
+		cmp turno, 1b
+		je JUG_NEGRAS
 		jmp MenuPrincipal
 
+	JUG_BLANCAS:
+		print turnoBlancas
+		ObtenerTexto bufferLectura
+		jmp INGRESAR
+
+	JUG_NEGRAS:
+		print turnoNegras
+		ObtenerTexto bufferLectura
+		jmp INGRESAR
+		
 	CARGAR:
 		print msg2
 		getChar

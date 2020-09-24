@@ -6,27 +6,34 @@ mov dx, offset cadena
 int 21h
 endm
 
-imprimir macro len, fn, fb, y8, vc, f1
-mov ah, 09h
-lea dx, y8
-int 21h
+imprimir macro len, fb, fn, y, vc, f, ln, enter;*******************
+LOCAL lp, VERFN, VERFB, VERVC, FINISH
+print ln
+print y
 
 PUSH SI
 PUSH AX
-
 xor si, si
-
 lp:
-	mov al, [f1+si]
+	mov al, [f+si]
 	cmp al, 001b
+	je VERFB
+	cmp al, 100b
 	je VERFN
 	jmp VERVC
+VERFB:
+	inc si
+	print fb
+	cmp si, len
+	jb lp
+	jmp FINISH
 
 VERFN:
 	inc si
 	print fn
 	cmp si, len
 	jb lp
+	jmp FINISH
 
 VERVC:;VER VACIO
 	inc si
@@ -34,12 +41,16 @@ VERVC:;VER VACIO
 	cmp si, len
 	jb lp
 
-POP AX
-POP SI
+FINISH:
+	POP AX
+	POP SI
+	print enter
+
 endm
 
 
 ObtenerTexto macro buffer;------------------
+LOCAL CONTINUE, FIN
 PUSH SI
 PUSH AX
 
