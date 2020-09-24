@@ -10,10 +10,10 @@ include prac3mac.asm
 ;VARIABLES GENERALES
 encabezadoP1 db 0ah, 'UNIVERSIDAD DE SAN CARLOS DE GUATEMALA', 10, 'FACULTAD DE INGENIERIA', 10,13, 'CIENCIAS Y SISTEMAS', 10,13, 'ARQUITECTURA DE COMPUTADORES Y ENSAMBLADORES 1', '$'
 encabezadoP2 db 0ah, 'NOMBRE: JESSICA ELIZABETH BOTON PEREZ', 10,13, 'CARNET: 201800535', 10,13, 'SECCION: A', 10,13, 10,13, 10,13, '$' 
-menuOpciones db '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar Juego', 10,13,'2) Cargar Juego', 10,13,'3) Salir', 10,13,10,13,'>','$' 
+menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar Juego', 10,13,'2) Cargar Juego', 10,13,'3) Salir', 10,13,10,13,'>','$' 
 
 ;VARIABLES INICIAR JUEGO
-msg1 db 0ah, 0dh, '---------- NUEVO JUEGO ----------', 10,13,10, '$'
+msg_nvo db 0ah, 0dh, '********** NUEVO JUEGO **********', 10,13, '$' ;10, TEMPORAL
 y8 db ' 8	|', '$'
 y7 db ' 7	|', '$'
 y6 db ' 6	|', '$'
@@ -28,23 +28,34 @@ rb db 'RB|', '$'
 rn db 'RN|', '$'
 vc db '  |', '$'
 ln db '  	-------------------------', 10,13, '$'
-xcord db 0ah, 0dh, 32,32,32,32,32,32,32,32,'  A  B  C  D  E  F  G  H', '$'
-turnoBlancas db 0ah, 0dh, 'Turno Blancas: ', '$'
-turnoNegras db 0ah, 0dh, 'Turno Negras: ', '$'
+xcord db 0ah, 0dh, 32,32,32,32,32,32,32,32,'  A  B  C  D  E  F  G  H', 10,13,'$'
+turnoBlancas db 0ah, 0dh, ' > Turno Blancas: ', '$'
+turnoNegras db 0ah, 0dh, ' > Turno Negras: ', '$'
 saltoLinea db 0ah, 0dh, '$'
 ;000->VACIO 	001->F_BLANCA 	011->REINA_BLANCA 	100->F_NEGRA 	110->REINA_NEGRA
 fila8 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
 fila7 db 000b, 001b, 000b, 001b, 000b, 001b, 000b, 001b
 fila6 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
-fila5 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b 
+fila5 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
 fila4 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
 fila3 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b
 fila2 db 100b, 000b, 100b, 000b, 100b, 000b, 100b, 000b
 fila1 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b 
 ;DETALLES JUEGO
 turno db 0b
-fila db 0b
-columna db 0b
+f1 db 0b
+col1 db 0b
+f2 db 0b
+col2 db 0b
+msg_errorC db 0ah, 0dh, '-------- ¡Coordenadas Erroneas! --------', '$'
+;VARIABLES COMANDOS
+comandoExit db 'E','X','I','T','$'
+comandoSave db 'S','A','V','E','$'
+extension db '.arq', '$'
+msg_salir db 0ah, 0dh, '-------- PARTIDA FINALIZADA --------', '$'
+msg_guardar db 0ah, 0dh, '-------- GUARDANDO PARTIDA --------', 10,13,'$'
+cinNomArch db 0ah, 0dh, '>Ingrese nombre para guardar: ', '$'
+msg_guardad db 0ah, 0dh, '-------- ¡Partida Guardada Con Exito! --------', '$'
 
 ;VARIABLES FICHERO
 dia db 3 dup('0')
@@ -58,8 +69,12 @@ bufferEscritura db 200 dup('$')
 handleFichero dw ?
 
 ;VARIABLES CARGAR JUEGO
+msg_carga db 0ah, 0dh, '-------- CARGANDO JUEGO --------', 10,13, '$'
+msg6 db 0ah, 0dh, '-------- CARGANDO JUEGO6 --------', '$'
 
-msg2 db 0ah, 0dh, '-------- CARGANDO JUEGO --------', '$'
+m1 db 0ah, 0dh, '-------- 1 --------', '$'
+m2 db 0ah, 0dh, '-------- 2 --------', '$'
+m3 db 0ah, 0dh, '-------- 3 --------', '$'
 
 ;==================== DECLARACION DE CODIGO =============================
 .code
@@ -84,9 +99,8 @@ main proc
 		;else
 		jmp MenuPrincipal
 
-
 	INGRESAR:
-		print msg1
+		print msg_nvo
 		imprimir SIZEOF fila8, fb, fn, y8, vc, fila8, ln, saltoLinea
 		imprimir SIZEOF fila7, fb, fn, y7, vc, fila7, ln, saltoLinea
 		imprimir SIZEOF fila6, fb, fn, y6, vc, fila6, ln, saltoLinea
@@ -97,7 +111,6 @@ main proc
 		imprimir SIZEOF fila1, fb, fn, y1, vc, fila1, ln, saltoLinea
 		print ln
 		print xcord
-		print saltoLinea
 		cmp turno, 0b
 		je JUG_BLANCAS
 		cmp turno, 1b
@@ -107,15 +120,44 @@ main proc
 	JUG_BLANCAS:
 		print turnoBlancas
 		ObtenerTexto bufferLectura
+		print saltoLinea
+		comparacion1 comandoExit, bufferLectura
+		comparacion2 comandoSave, bufferLectura
+		;validarCoordenadas SIZEOF bufferLectura, bufferLectura, msg_errorC
+		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3 
+		mov turno, 1b
 		jmp INGRESAR
 
 	JUG_NEGRAS:
 		print turnoNegras
 		ObtenerTexto bufferLectura
+		print saltoLinea
+		comparacion1 comandoExit, bufferLectura
+		comparacion2 comandoSave, bufferLectura
+		mov turno, 0b
 		jmp INGRESAR
+
+	SAVE:
+		print msg_guardar
+		print cinNomArch
+		ObtenerTexto bufferLectura
+		print msg_guardad
+		cmp turno, 0b
+		je JUG_BLANCAS
+		cmp turno, 1b
+		je JUG_NEGRAS
+		jmp MenuPrincipal
 		
+	ERROR_COORD:
+		print msg_errorC
+		cmp turno, 0b
+		je JUG_BLANCAS
+		cmp turno, 1b
+		je JUG_NEGRAS
+		jmp MenuPrincipal
+
 	CARGAR:
-		print msg2
+		print msg_carga
 		getChar
 		jmp MenuPrincipal
 
