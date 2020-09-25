@@ -69,21 +69,14 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	msg_generad db 0ah, 0dh, '--- Visualizacion Generada Con Exito ---', 10,13, '$'
 
 ;VARIABLES FICHERO
-	dia db 3 dup('0')
-	mes db 3 dup('0')
-	anio db 7 dup('0'); 2020 - |Espacio,guion,espacio -> 4+3=7
-	hora db 3 dup('0')
-	minuto db 3 dup('0')
-	segundo db 3 dup('0')
-	h1 db 0
-	h2 db 0
-	dosPuntos db ':'
-
+	guion db ' - '
+	bufferHora db 8 dup('0')
+	bufferFecha db 8 dup('0')
 
 	rutaArchivo db 100 dup('$')
 	bufferLectura db 200 dup('$')
 	bufferEscritura db 200 dup('$')
-	rutaNomHtml db 'Tab.html', 00h
+	rutaNomHtml db 'AETab.html', 00h
 	handleFichero dw ?
 	msmError1 db 0ah,0dh,'Error al abrir archivo','$'
 	msmError2 db 0ah,0dh,'Error al leer archivo','$'
@@ -195,16 +188,17 @@ main proc
 	SHOW:
 		print msg_generar
 		print infoNomArch
-		;INICIA LA GENERACION DEL HTML
-		crearF rutaNomHtml,handleFichero
+		crearF rutaNomHtml,handleFichero;INICIA LA GENERACION DEL HTML
 		abrirF rutaNomHtml,handleFichero
 		escribirF  SIZEOF inicioHtml, inicioHtml, handleFichero
-		getHora hora
+		getDetalleFecha
+		getDetalleHora ;bufferHora
 
 	SHOW2:
-		;escribirF SIZEOF h1, h1, handleFichero
+		escribirF SIZEOF bufferFecha, bufferFecha, handleFichero
+		escribirF SIZEOF guion, guion, handleFichero
+		escribirF SIZEOF bufferHora, bufferHora, handleFichero
 		;escribirF SIZEOF h2, h2, handleFichero
-		escribirF SIZEOF hora, hora, handleFichero
 		escribirF SIZEOF cierreH1, cierreH1, handleFichero
 		escribirF SIZEOF inicioTabla, inicioTabla, handleFichero
 		;CONTENIDO TABLA
@@ -216,7 +210,6 @@ main proc
 		cmp turno, 1b
 		je JUG_NEGRAS
 		jmp MenuPrincipal
-
 
 	
 ;----------------------------ERRORES-------------------------------
@@ -259,5 +252,37 @@ main proc
 		int 21h
 
 main endp
+
+Siguiente proc
+	AAM
+	MOV BX,AX
+	MOV DL,BH      ; Since the values are in BX, BH Part
+	ADD DL,30H     ; ASCII Adjustment
+	MOV bufferFecha[si], DL
+	inc si 
+
+	MOV DL,BL      ; BL Part 
+	ADD DL,30H     ; ASCII Adjustment
+	MOV bufferFecha[si], DL
+	inc si 
+
+	ret
+Siguiente endp
+
+Sig proc
+	AAM
+	MOV BX,AX
+	MOV DL,BH      ; Since the values are in BX, BH Part
+	ADD DL,30H     ; ASCII Adjustment
+	MOV bufferHora[si], DL
+	inc si 
+
+	MOV DL,BL      ; BL Part 
+	ADD DL,30H     ; ASCII Adjustment
+	MOV bufferHora[si], DL
+	inc si 
+
+	ret
+Sig endp
 
 end

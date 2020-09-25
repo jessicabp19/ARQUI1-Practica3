@@ -128,28 +128,62 @@
 
 ;******************** MACROS PARA OBTENER FECHA Y HORA ******************
 
-	getHora macro bufferHora
-		MOV AH,2CH    ; To get System Time
-		INT 21H
-		MOV AL,CH     ; Hour is in CH
-		AAM
-		MOV BX,AX
-		
+	getDetalleFecha macro
+		LOCAL getD, getM, getA
 		PUSH SI
 		PUSH AX
 		xor si, si
-		MOV DL,BH      ; Since the values are in BX, BH Part
-		ADD DL,30H     ; ASCII Adjustment
-		MOV bufferHora[si], DL
-		inc si 
 
-		MOV DL,BL      ; BL Part 
-		ADD DL,30H     ; ASCII Adjustment
-		MOV bufferHora[si], DL
-		inc si 
+		MOV AH,2AH    ; To get System Time
+		INT 21H
+		
+		getD:
+			MOV AL,DL     ; Hour is in CH
+			CALL Siguiente
+			MOV AL, 2fh		; '/'
+			MOV bufferFecha[si], AL
+			inc si
+		getM:
+			MOV AL,DH     ; Minutes is in CL
+			CALL Siguiente
+			MOV AL, 2fh		; '/'
+			MOV bufferFecha[si], AL
+			inc si
+		getA:
+			MOV AL,DH     ; Seconds is in DH
+			ADD CX,0F830H ; To negate the effects of 16bit value,
+			MOV AX,CX     ; since AAM is applicable only for AL (YYYY -> YY)
+			CALL Siguiente
 
-		MOV AL, 3ah		; ':'
-		MOV bufferHora[si], AL
+		POP AX
+		POP SI
+	endm
+
+	getDetalleHora macro
+		LOCAL getH, getM, getS
+		PUSH SI
+		PUSH AX
+		xor si, si
+
+		MOV AH,2CH    ; To get System Time
+		INT 21H
+		
+		getH:
+			MOV AL,CH     ; Hour is in CH
+			CALL Sig
+			MOV AL, 3ah		; ':'
+			MOV bufferHora[si], AL
+			inc si
+		getM:
+			MOV AL,CL     ; Minutes is in CL
+			CALL Sig
+			MOV AL, 3ah		; ':'
+			MOV bufferHora[si], AL
+			inc si
+		getS:
+			MOV AL,DH     ; Seconds is in DH
+			CALL Sig
+
 		POP AX
 		POP SI
 	endm
