@@ -71,14 +71,19 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 ;VARIABLES FICHERO
 	dia db 3 dup('0')
 	mes db 3 dup('0')
-	anio db 5 dup('0')
+	anio db 7 dup('0'); 2020 - |Espacio,guion,espacio -> 4+3=7
 	hora db 3 dup('0')
 	minuto db 3 dup('0')
+	segundo db 3 dup('0')
+	h1 db 0
+	h2 db 0
+	dosPuntos db ':'
+
 
 	rutaArchivo db 100 dup('$')
 	bufferLectura db 200 dup('$')
 	bufferEscritura db 200 dup('$')
-	rutaNomHtml db 'Tablero.ht', 00h
+	rutaNomHtml db 'Tab.html', 00h
 	handleFichero dw ?
 	msmError1 db 0ah,0dh,'Error al abrir archivo','$'
 	msmError2 db 0ah,0dh,'Error al leer archivo','$'
@@ -86,7 +91,9 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	msmError4 db 0ah,0dh,'Error al Escribir archivo','$'
 
 ;VARIBLES HTML
-	inicioHtml db '<html>', 10,13, '<title>201800535</title>', 10,13, '<body>', 10,13, '<table>', 10,13, 00h
+	inicioHtml db '<html>', 10,13, '<title>201800535</title>', 10,13, '<body>', 10,13, '<H1 align="center">', 00h
+	cierreH1 db '</H1>', 00h
+	inicioTabla db '<table>', 10,13, 00h
 	finHtml db '</table>', 10,13, '</body>', 10,13, '</html>', 00h
 	fichaB db 0ah, 0dh, '<td bgcolor="black"><img src="Fb.png"></td>', '$'
 	fichaN db 0ah, 0dh, '<td bgcolor="black"><img src="Fn.png"></td>', '$'
@@ -98,12 +105,12 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	;VacioN db 0ah, 0dh, '<td bgcolor="black"><img src="Vn.png"></td>', '$'
 
 ;VARIABLES CARGAR JUEGO
-msg_carga db 0ah, 0dh, '-------- CARGANDO JUEGO --------', 10,13, '$'
-msg6 db 0ah, 0dh, '-------- CARGANDO JUEGO6 --------', '$'
+	msg_carga db 0ah, 0dh, '-------- CARGANDO JUEGO --------', 10,13, '$'
+	msg6 db 0ah, 0dh, '-------- CARGANDO JUEGO6 --------', '$'
 
-m1 db 0ah, 0dh, '-------- 1 --------', '$'
-m2 db 0ah, 0dh, '-------- 2 --------', '$'
-m3 db 0ah, 0dh, '-------- 3 --------', '$'
+	m1 db 0ah, 0dh, '-------- 1 --------', '$'
+	m2 db 0ah, 0dh, '-------- 2 --------', '$'
+	m3 db 0ah, 0dh, '-------- 3 --------', '$'
 
 ;==================== DECLARACION DE CODIGO =============================
 .code
@@ -128,7 +135,7 @@ main proc
 		;else
 		jmp MenuPrincipal
 
-	;-----------------------------JUEGO--------------------------------
+;-----------------------------JUEGO--------------------------------
 	INGRESAR:
 		print msg_nvo
 		imprimir SIZEOF fila8, fb, fn, y8, vc, fila8, ln, saltoLinea
@@ -175,7 +182,7 @@ main proc
 		je JUG_NEGRAS
 		jmp MenuPrincipal
 
-	;---------------------------COMANDOS-------------------------------
+;---------------------------COMANDOS-------------------------------
 	SAVE:
 		print msg_guardar
 		print cinNomArch
@@ -188,11 +195,19 @@ main proc
 	SHOW:
 		print msg_generar
 		print infoNomArch
-		;GENERACION DEL HTML
+		;INICIA LA GENERACION DEL HTML
 		crearF rutaNomHtml,handleFichero
 		abrirF rutaNomHtml,handleFichero
-		;getTexto bufferEscritura
 		escribirF  SIZEOF inicioHtml, inicioHtml, handleFichero
+		getHora hora
+
+	SHOW2:
+		;escribirF SIZEOF h1, h1, handleFichero
+		;escribirF SIZEOF h2, h2, handleFichero
+		escribirF SIZEOF hora, hora, handleFichero
+		escribirF SIZEOF cierreH1, cierreH1, handleFichero
+		escribirF SIZEOF inicioTabla, inicioTabla, handleFichero
+		;CONTENIDO TABLA
 		escribirF  SIZEOF finHtml, finHtml, handleFichero
 		cerrarF handleFichero
 		print msg_generad
@@ -201,8 +216,10 @@ main proc
 		cmp turno, 1b
 		je JUG_NEGRAS
 		jmp MenuPrincipal
+
+
 	
-	;----------------------------ERRORES-------------------------------
+;----------------------------ERRORES-------------------------------
 	ERROR_COORD:
 		print msg_errorC
 		cmp turno, 0b
@@ -231,7 +248,7 @@ main proc
 	   	getChar
 	   	jmp VolverTurno
 
-	;-----------------------------CARGAR-----------------------------
+;-----------------------------CARGAR-----------------------------
 	CARGAR:
 		print msg_carga
 		getChar
