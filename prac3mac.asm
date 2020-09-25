@@ -15,12 +15,18 @@ imprimir macro len, fb, fn, y, vc, f, ln, enter;*******************
 	PUSH AX
 	xor si, si
 	DO:
-		mov al, [f+si]
+		mov al, [f+si]		;AQUI
 		cmp al, 001b
 		je VERFB
 		cmp al, 100b
 		je VERFN
 		jmp VERVC
+
+	COMPARE:
+		inc si 				;AQUI
+		cmp si, len 		;AQUI
+		jb DO
+		jmp FIN
 
 	VERFB:
 		print fb
@@ -32,11 +38,7 @@ imprimir macro len, fb, fn, y, vc, f, ln, enter;*******************
 		print vc
 		jmp COMPARE
 
-	COMPARE:
-		inc si
-		cmp si, len
-		jb DO
-		jmp FIN
+	
 	FIN:
 		POP AX
 		POP SI
@@ -82,15 +84,48 @@ comparacion1 macro comandoE, buffer
 	lea di, buffer
 	repne cmpsw
 	je MenuPrincipal
-	;repe cmpsb
-	;ja MenuPrincipal	;SE ACTIVA JA CUANDO ES IGUAL
-						;SE ACTIVA JB CUANDO ES DISTINTO
+
+	POP AX
+	POP SI
+endm
+
+comparacion2 macro comandoS, buffer
+	PUSH SI
+	PUSH AX
+	xor si, si
+
+	mov CX, 50
+	mov AX, DS
+	mov ES, AX
+	lea si, comandoS
+	lea di, buffer
+	repne cmpsw
+	je SAVE
+	
+	POP AX
+	POP SI
+endm
+
+comparacion3 macro comandoS, buffer
+	PUSH SI
+	PUSH AX
+	xor si, si
+
+	mov CX, 50
+	mov AX, DS
+	mov ES, AX
+
+	lea si, comandoS
+	lea di, buffer
+	repne cmpsw
+	je SHOW
+	
 	POP AX
 	POP SI
 endm
 
 verifCoord macro f1, col1, f2, col2, buffer, m1, m2, m3;*******************
-	LOCAL DO1, DO2, D03, LETRA1, NUM1, COMA, FIN, COMPARE
+	LOCAL DO1, DO2, DO3, DO4, LETRA1, NUM1, COMA, LETRA2, NUM2, ULTIMO, FIN
 
 	PUSH SI
 	PUSH AX
@@ -117,11 +152,23 @@ verifCoord macro f1, col1, f2, col2, buffer, m1, m2, m3;*******************
 
 	DO2:
 		mov al, [buffer+si]
-		cmp al, '0'
-		je ERROR_COORD
-		cmp al, '9'
-		je ERROR_COORD
-		jmp NUM1
+		cmp al, '1'
+		je NUM1
+		cmp al, '2'
+		je NUM1
+		cmp al, '3'
+		je NUM1
+		cmp al, '4'
+		je NUM1
+		cmp al, '5'
+		je NUM1
+		cmp al, '6'
+		je NUM1
+		cmp al, '7'
+		je NUM1
+		cmp al, '8'
+		je NUM1
+		jmp ERROR_COORD
 
 	LETRA1:
 		inc si
@@ -131,11 +178,72 @@ verifCoord macro f1, col1, f2, col2, buffer, m1, m2, m3;*******************
 	NUM1:
 		inc si
 		mov f1, al
-		jmp FIN
+		jmp COMA
 
 	COMA:
-		print m3
-		jmp FIN
+		mov al, [buffer+si]
+		cmp al, 2ch;','
+		je DO3
+		cmp al, 24h;'$'
+		je FIN
+		jmp ERROR_COORD
+
+	DO3:
+		inc si
+		mov al, [buffer+si]
+		cmp al, 41h
+		je LETRA2
+		cmp al, 42H
+		je LETRA2
+		cmp al, 43H
+		je LETRA2
+		cmp al, 44H
+		je LETRA2
+		cmp al, 45h
+		je LETRA2
+		cmp al, 46H
+		je LETRA2
+		cmp al, 47H
+		je LETRA2
+		cmp al, 48H
+		je LETRA2
+		jmp ERROR_COORD
+
+	DO4:
+		mov al, [buffer+si]
+		cmp al, '1'
+		je NUM2
+		cmp al, '2'
+		je NUM2
+		cmp al, '3'
+		je NUM2
+		cmp al, '4'
+		je NUM2
+		cmp al, '5'
+		je NUM2
+		cmp al, '6'
+		je NUM2
+		cmp al, '7'
+		je NUM2
+		cmp al, '8'
+		je NUM2
+		jmp ERROR_COORD
+
+	LETRA2:
+		inc si
+		mov col2, al
+		jmp DO4
+
+	NUM2:
+		inc si
+		mov f2, al
+		jmp ULTIMO
+
+	ULTIMO:
+		mov al, [buffer+si]
+		cmp al, 24h;'$'
+		je FIN
+		jmp ERROR_COORD
 
 	FIN:
 		POP AX
@@ -143,30 +251,6 @@ verifCoord macro f1, col1, f2, col2, buffer, m1, m2, m3;*******************
 endm
 
 
-comparacion2 macro comandoS, buffer
-	PUSH SI
-	PUSH AX
-	xor si, si
-
-	mov CX, 50
-	mov AX, DS
-	mov ES, AX
-
-	lea si, comandoS
-	lea di, buffer
-	repne cmpsw
-	je SAVE
-	;repe cmpsb
-	;ja SAVE	;SE ACTIVA JA CUANDO ES IGUAL
-
-	;xor si, si
-	;lea si, comandoS
-	;lea di, buffer
-	;repe cmpsb
-	;ja SAVE				;SE ACTIVA JB CUANDO ES DISTINTO
-	POP AX
-	POP SI
-endm
 
 printChar macro char;*********************************************
 	mov ah, 02h

@@ -8,8 +8,8 @@ include prac3mac.asm
 ;==================== DECLARACION DE DATOS ==============================
 .data
 ;VARIABLES GENERALES
-encabezadoP1 db 0ah, 'UNIVERSIDAD DE SAN CARLOS DE GUATEMALA', 10, 'FACULTAD DE INGENIERIA', 10,13, 'CIENCIAS Y SISTEMAS', 10,13, 'ARQUITECTURA DE COMPUTADORES Y ENSAMBLADORES 1', '$'
-encabezadoP2 db 0ah, 'NOMBRE: JESSICA ELIZABETH BOTON PEREZ', 10,13, 'CARNET: 201800535', 10,13, 'SECCION: A', 10,13, 10,13, 10,13, '$' 
+encabezadoP1 db 0ah, 0ah, 'UNIVERSIDAD DE SAN CARLOS DE GUATEMALA', 10, 'FACULTAD DE INGENIERIA', 10,13, 'CIENCIAS Y SISTEMAS', 10,13, 'ARQUITECTURA DE COMPUTADORES Y ENSAMBLADORES 1', '$'
+encabezadoP2 db 0ah, 'NOMBRE: JESSICA ELIZABETH BOTON PEREZ', 10,13, 'CARNET: 201800535', 10,13, 'SECCION: A', 10,13, 10,13, '$' 
 menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar Juego', 10,13,'2) Cargar Juego', 10,13,'3) Salir', 10,13,10,13,'>','$' 
 
 ;VARIABLES INICIAR JUEGO
@@ -47,15 +47,22 @@ f1 db 0b
 col1 db 0b
 f2 db 0b
 col2 db 0b
-msg_errorC db 0ah, 0dh, '-------- ¡Coordenadas Erroneas! --------', '$'
+division db '--------------------------------', '$'
+msg_errorC db '-- Atencion, Coordenadas Erroneas --', 10,13, '$'
 ;VARIABLES COMANDOS
 comandoExit db 'E','X','I','T','$'
 comandoSave db 'S','A','V','E','$'
+comandoShow db 'S','H','O','W','$'
 extension db '.arq', '$'
 msg_salir db 0ah, 0dh, '-------- PARTIDA FINALIZADA --------', '$'
+
 msg_guardar db 0ah, 0dh, '-------- GUARDANDO PARTIDA --------', 10,13,'$'
 cinNomArch db 0ah, 0dh, '>Ingrese nombre para guardar: ', '$'
 msg_guardad db 0ah, 0dh, '-------- ¡Partida Guardada Con Exito! --------', '$'
+
+msg_generar db 0ah, 0dh, '-------- GENERANDO ARCHIVO --------', 10,13,'$'
+infoNomArch db 0ah, 0dh, '>El nombre del archivo es: estadoTablero.html', '$'
+msg_generad db 0ah, 0dh, '-------- ¡Visualización Generada Con Exito! --------', '$'
 
 ;VARIABLES FICHERO
 dia db 3 dup('0')
@@ -111,6 +118,7 @@ main proc
 		imprimir SIZEOF fila1, fb, fn, y1, vc, fila1, ln, saltoLinea
 		print ln
 		print xcord
+		print division
 		cmp turno, 0b
 		je JUG_BLANCAS
 		cmp turno, 1b
@@ -120,10 +128,9 @@ main proc
 	JUG_BLANCAS:
 		print turnoBlancas
 		ObtenerTexto bufferLectura
-		print saltoLinea
 		comparacion1 comandoExit, bufferLectura
 		comparacion2 comandoSave, bufferLectura
-		;validarCoordenadas SIZEOF bufferLectura, bufferLectura, msg_errorC
+		comparacion3 comandoShow, bufferLectura
 		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3 
 		mov turno, 1b
 		jmp INGRESAR
@@ -131,9 +138,10 @@ main proc
 	JUG_NEGRAS:
 		print turnoNegras
 		ObtenerTexto bufferLectura
-		print saltoLinea
 		comparacion1 comandoExit, bufferLectura
 		comparacion2 comandoSave, bufferLectura
+		comparacion3 comandoShow, bufferLectura
+		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3 
 		mov turno, 0b
 		jmp INGRESAR
 
@@ -141,7 +149,19 @@ main proc
 		print msg_guardar
 		print cinNomArch
 		ObtenerTexto bufferLectura
+		;GUARDAD EL .ARQ
 		print msg_guardad
+		cmp turno, 0b
+		je JUG_BLANCAS
+		cmp turno, 1b
+		je JUG_NEGRAS
+		jmp MenuPrincipal
+
+	SHOW:
+		print msg_generar
+		print infoNomArch
+		;GENERACION DEL HTML
+		print msg_generad
 		cmp turno, 0b
 		je JUG_BLANCAS
 		cmp turno, 1b
