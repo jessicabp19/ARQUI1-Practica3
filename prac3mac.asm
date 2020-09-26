@@ -24,7 +24,6 @@
 			cmp al, 100b
 			je VERFN
 			jmp VERVC
-
 		COMPARE:
 			inc si 				;AQUI
 			cmp si, len 		;AQUI
@@ -40,7 +39,6 @@
 		VERVC:
 			print vc
 			jmp COMPARE
-
 		
 		FIN:
 			POP AX
@@ -74,6 +72,46 @@
 		mov ah, 01h
 		int 21h
 	endm
+
+	imprimirHtml macro len, fb, fn, f, vb, vn, tr, ctr, handleFichero
+		LOCAL DO, VERFN, VERFB, VERVB, VERVN, FIN, COMPARE
+		PUSH SI
+		PUSH AX
+		xor si, si
+		escribirF SIZEOF tr, tr, handleFichero
+		DO:
+			mov al, [f+si]		;AQUI
+			cmp al, 001b
+			je VERFB
+			cmp al, 100b
+			je VERFN
+			cmp al, 000b
+			je VERVB
+			jmp VERVN
+
+		COMPARE:
+			inc si 				;AQUI
+			cmp si, len 		;AQUI
+			jb DO
+			jmp FIN
+
+		VERFB:
+			escribirF SIZEOF fb, fb, handleFichero
+			jmp COMPARE
+		VERFN:
+			escribirF SIZEOF fn, fn, handleFichero
+			jmp COMPARE	
+		VERVB:
+			escribirF SIZEOF vb, vb, handleFichero
+			jmp COMPARE
+		VERVN:
+			escribirF SIZEOF vn, vn, handleFichero
+			jmp COMPARE
+		FIN:
+			escribirF SIZEOF ctr, ctr, handleFichero
+			POP AX
+			POP SI
+		endm
 
 
 ;********************* MACROS PARA MANEJO DE FICHEROS *******************
@@ -246,14 +284,15 @@
 
 ;******************** MACROS PARA LA JUGABILIDAD *************************
 
-	verifCoord macro f1, col1, f2, col2, buffer, m1, m2, m3
+	verifCoord macro f1, col1, f2, col2, buffer, m1, m2, m3, tipoCoord
 		LOCAL DO1, DO2, DO3, DO4, LETRA1, NUM1, COMA, LETRA2, NUM2, ULTIMO, FIN
 
 		PUSH SI
 		PUSH AX
 		xor si, si
 		DO1:
-			mov al, [buffer+si]
+			mov tipoCoord, 0b
+			mov al, buffer[si]
 			cmp al, 41h
 			je LETRA1
 			cmp al, 42H
@@ -273,7 +312,8 @@
 			jmp ERROR_COORD
 
 		DO2:
-			mov al, [buffer+si]
+			xor al, 0
+			mov al, buffer[si]
 			cmp al, '1'
 			je NUM1
 			cmp al, '2'
@@ -303,7 +343,7 @@
 			jmp COMA
 
 		COMA:
-			mov al, [buffer+si]
+			mov al, buffer[si]
 			cmp al, 2ch;','
 			je DO3
 			cmp al, 24h;'$'
@@ -311,8 +351,9 @@
 			jmp ERROR_COORD
 
 		DO3:
+			mov tipoCoord, 1b
 			inc si
-			mov al, [buffer+si]
+			mov al, buffer[si]
 			cmp al, 41h
 			je LETRA2
 			cmp al, 42H
@@ -372,6 +413,143 @@
 			POP SI
 	endm
 
+	obtenerPos macro col, pos
+		LOCAL P1, P2, P3, P4, P5, P6, P7, P8, FIN
+
+		mov al, col
+		cmp al, 41h
+		je P1
+		cmp al, 42H
+		je P2
+		cmp al, 43H
+		je P3
+		cmp al, 44H
+		je P4
+		cmp al, 45h
+		je P5
+		cmp al, 46H
+		je P6
+		cmp al, 47H
+		je P7
+		cmp al, 48H
+		je P8
+
+		P1:
+			mov pos, 0b
+			jmp FIN
+		P2:
+			mov pos, 1b
+			jmp FIN
+		P3:
+			mov pos, 10b
+			jmp FIN
+		P4:
+			mov pos, 11b
+			jmp FIN
+		P5:
+			mov pos, 100b
+			jmp FIN
+		P6:
+			mov pos, 101b
+			jmp FIN
+		P7:
+			mov pos, 110b
+			jmp FIN
+		P8:
+			mov pos, 111b
+			jmp FIN
+
+		FIN:
+			;print pos
+	endm
+
+	findYAxis1 macro f1, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+		LOCAL F8, F7, F6, F5, F4, F3, FIN;F2, F1, FIN
+		cmp f1, '8'
+		je F8
+		cmp f1, '7'
+		je F7
+		cmp f1, '6'
+		je F6
+		cmp f1, '5'
+		je F5
+		cmp f1, '4'
+		je F4
+		cmp f1, '3'
+		je F3
+		;cmp f1, '2'
+		;je F2
+		;cmp f1, '1'
+		;je F1
+		jmp INGRESAR
+
+		F8:
+			findXAxis1 fila8, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+			je FIN
+		F7:
+			findXAxis1 fila7, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+			je FIN
+		F6:
+			findXAxis1 fila6, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+			je FIN
+		F5:
+			findXAxis1 fila5, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+			je FIN
+		F4:
+			findXAxis1 fila4, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+			je FIN
+		F3:
+			findXAxis1 fila3, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+			je FIN
+		;F2:
+		;	findXAxis1 fila2, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+		;	je FIN
+		;F1:
+		;	findXAxis1 fila1, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+		;	je FIN
+		FIN:
+			je MENSAJE
+	endm
+
+	findXAxis1 macro f, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+		LOCAL VALIDACION1, CompBlanca, CompNegra, M1, FIN
+		PUSH SI
+		PUSH DX
+		xor si, si
+
+		MOV DL, pos1
+		MOV DH, 0
+		MOV SI, DX
+		;je VALIDACION1
+
+		VALIDACION1:
+			cmp turno, 0b
+			je CompBlanca
+			jmp CompNegra
+
+		CompBlanca:
+			cmp f[si], 001b
+			je M1;VALIDACION2
+			jmp ErrorCrear
+		CompNegra:
+			cmp f[si], 100b
+			je M1;VALIDACION2
+			jmp ErrorCrear
+
+		;VALIDACION2:
+		;	findYAxis2 f, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+		;	jmp FIN
+		M1:
+			mov f[si], 000b
+			jmp FIN
+
+		FIN:	
+
+			POP DX
+			POP SI
+	endm
+
+	
 
 ;************************* MACROS TEMPORALES *****************************
 

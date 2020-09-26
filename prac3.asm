@@ -33,13 +33,16 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	turnoBlancas db 0ah, 0dh, ' > Turno Blancas: ', '$'
 	turnoNegras db 0ah, 0dh, ' > Turno Negras: ', '$'
 	saltoLinea db 0ah, 0dh, '$'
+	salto db 0ah, 0dh, 00h
 
 ;000->VACIO 	001->F_BLANCA 	011->REINA_BLANCA 	100->F_NEGRA 	110->REINA_NEGRA
 	fila8 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
 	fila7 db 000b, 001b, 000b, 001b, 000b, 001b, 000b, 001b
 	fila6 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
-	fila5 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
-	fila4 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
+	fila5 db 000b, 111b, 000b, 111b, 000b, 111b, 000b, 111b
+	fila4 db 111b, 000b, 111b, 000b, 111b, 000b, 111b, 000b
+	;fila5 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
+	;fila4 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
 	fila3 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b
 	fila2 db 100b, 000b, 100b, 000b, 100b, 000b, 100b, 000b
 	fila1 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b 
@@ -48,9 +51,17 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	turno db 0b
 	f1 db 0b
 	col1 db 0b
+	pos1 db 0b
 	f2 db 0b
 	col2 db 0b
+	pos2 db 0b
+	tipoCoord db 0b
+	filaSelec1 db 8 dup(000b)
+	filaSelec2 db 8 dup(000b)
 	division db '--------------------------------', '$'
+	msg_coord1 db '-- Casilla Destino --', 10,13, '$'
+	msg_coord2 db '-- Casilla Fuente, Destino --', 10,13, '$'
+	msg_movimiento db '-- Movimiento Realizado --', 10,13, '$'
 	msg_errorC db '-- Atencion, Coordenadas Erroneas --', 10,13, '$'
 
 ;VARIABLES COMANDOS
@@ -84,16 +95,18 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	msmError4 db 0ah,0dh,'Error al Escribir archivo','$'
 
 ;VARIBLES HTML
-	inicioHtml db '<html>', 10,13, '<title>201800535</title>', 10,13, '<body>', 10,13, '<H1 align="center">', 00h
-	cierreH1 db '</H1>', 00h
-	inicioTabla db '<table>', 10,13, 00h
-	finHtml db '</table>', 10,13, '</body>', 10,13, '</html>', 00h
-	fichaB db 0ah, 0dh, '<td bgcolor="black"><img src="Fb.png"></td>', '$'
-	fichaN db 0ah, 0dh, '<td bgcolor="black"><img src="Fn.png"></td>', '$'
-	ReinaB db 0ah, 0dh, '<td bgcolor="black"><img src="Rb.png"></td>', '$'
-	ReinaN db 0ah, 0dh, '<td bgcolor="black"><img src="Rn.png"></td>', '$'
-	VacioB db 0ah, 0dh, '<td bgcolor="white"></td>', '$'
-	VacioN db 0ah, 0dh, '<td bgcolor="black"></td>', '$'
+	inicioHtml db '<html>', 10,13, '<head>', 10,13,9, '<title>201800535</title>', 10,13, '</head>', 10,13, '<body bgcolor=#20D08C>', 10,13,9, '<H1 align="center">', 00h ;20D08C;FED7CE
+	cierreH1 db '</H1>', 10,13, 00h
+	inicioTabla db 9, '<center>', 10,13, '<table border=0 cellspacing=2 cellpadding=2>', 10,13, 00h ; bgcolor=#005b96
+	tr db 9,9, '<tr align=center>', 00h
+	ctr db 0ah, 0dh, 9,9, '</tr>', 10,13, 00h
+	finHtml db 9, '</table>', 10,13, '</center>', 10,13, '</body>', 10,13, '</html>', 00h
+	fichaB db 0ah, 0dh, 9, '		<td bgcolor="brown"><img src="Fb.png" style=max-height:100%; max-width:100%/></td>', 00h
+	fichaN db 0ah, 0dh, 9, '		<td bgcolor="brown"><img src="Fn.png" style=max-height:100%; max-width:100%/></td>', 00h
+	ReinaB db 0ah, 0dh, 9, '		<td bgcolor="brown"><img src="Rb.png"></td>', 00h
+	ReinaN db 0ah, 0dh, 9, '		<td bgcolor="brown"><img src="Rn.png"></td>', 00h
+	VacioB db 0ah, 0dh, 9, '		<td bgcolor="white" width=47px; height=125px;></td>', 00h
+	VacioN db 0ah, 0dh, 9, '		<td bgcolor="brown" width=47px; height=125px;></td>', 00h
 	;VacioB db 0ah, 0dh, '<td bgcolor="white"><img src="Vb.png"></td>', '$'
 	;VacioN db 0ah, 0dh, '<td bgcolor="black"><img src="Vn.png"></td>', '$'
 
@@ -154,7 +167,10 @@ main proc
 		comparacion1 comandoExit, bufferLectura
 		comparacion2 comandoSave, bufferLectura
 		comparacion3 comandoShow, bufferLectura
-		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3 
+		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3, tipoCoord
+		cmp tipoCoord, 0b
+		je COORD_T1
+		jmp COORD_T2
 		mov turno, 1b
 		jmp INGRESAR
 
@@ -164,9 +180,40 @@ main proc
 		comparacion1 comandoExit, bufferLectura
 		comparacion2 comandoSave, bufferLectura
 		comparacion3 comandoShow, bufferLectura
-		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3 
+		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3, tipoCoord
 		mov turno, 0b
 		jmp INGRESAR
+
+	COORD_T1:
+		print msg_coord1
+		jmp VolverTurno
+
+	COORD_T2:
+		;print salto
+		print msg_coord2
+		obtenerPos col1, pos1
+		obtenerPos col2, pos2
+		findYAxis1 f1, pos1, f2, pos2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+		jmp INGRESAR
+
+	A:
+		cmp col1, 47H
+		je B
+		jmp INGRESAR
+	B:
+		cmp fila6[6], 001b
+		je BB
+		jmp INGRESAR
+
+	BB:
+		print msg_coord1
+		cmp turno, 0b
+		je CC
+		jmp INGRESAR
+
+	CC:
+		mov fila6[6], 111b
+		jmp VolverTurno
 
 	VolverTurno:
 		cmp turno, 0b
@@ -190,36 +237,50 @@ main proc
 		print infoNomArch
 		crearF rutaNomHtml,handleFichero;INICIA LA GENERACION DEL HTML
 		abrirF rutaNomHtml,handleFichero
+
+	SHOW_SUPERIOR:
 		escribirF  SIZEOF inicioHtml, inicioHtml, handleFichero
 		getDetalleFecha
-		getDetalleHora ;bufferHora
-
-	SHOW2:
+		getDetalleHora
 		escribirF SIZEOF bufferFecha, bufferFecha, handleFichero
 		escribirF SIZEOF guion, guion, handleFichero
 		escribirF SIZEOF bufferHora, bufferHora, handleFichero
-		;escribirF SIZEOF h2, h2, handleFichero
 		escribirF SIZEOF cierreH1, cierreH1, handleFichero
+
+	SHOW_MEDIO:
 		escribirF SIZEOF inicioTabla, inicioTabla, handleFichero
-		;CONTENIDO TABLA
+		imprimirHtml SIZEOF fila8, fichaB, fichaN, fila8, VacioB, VacioN, tr, ctr, handleFichero
+		imprimirHtml SIZEOF fila7, fichaB, fichaN, fila7, VacioB, VacioN, tr, ctr, handleFichero
+		imprimirHtml SIZEOF fila6, fichaB, fichaN, fila6, VacioB, VacioN, tr, ctr, handleFichero
+		imprimirHtml SIZEOF fila5, fichaB, fichaN, fila5, VacioB, VacioN, tr, ctr, handleFichero
+		imprimirHtml SIZEOF fila4, fichaB, fichaN, fila4, VacioB, VacioN, tr, ctr, handleFichero
+		imprimirHtml SIZEOF fila3, fichaB, fichaN, fila3, VacioB, VacioN, tr, ctr, handleFichero
+		imprimirHtml SIZEOF fila2, fichaB, fichaN, fila2, VacioB, VacioN, tr, ctr, handleFichero
+		imprimirHtml SIZEOF fila1, fichaB, fichaN, fila1, VacioB, VacioN, tr, ctr, handleFichero
+
+	SHOW_FINAL:
 		escribirF  SIZEOF finHtml, finHtml, handleFichero
 		cerrarF handleFichero
 		print msg_generad
-		cmp turno, 0b
-		je JUG_BLANCAS
-		cmp turno, 1b
-		je JUG_NEGRAS
-		jmp MenuPrincipal
+		jmp VolverTurno
+
+
+;--------------------------CONFIRMACIONES-----------------------------
+	CONF_COORD:
+		print msg_coord1
+		jmp INGRESAR
+
+	MENSAJE:
+		;print saltoLinea
+	    print msg_movimiento
+	    getChar
+	    jmp INGRESAR
 
 	
 ;----------------------------ERRORES-------------------------------
 	ERROR_COORD:
 		print msg_errorC
-		cmp turno, 0b
-		je JUG_BLANCAS
-		cmp turno, 1b
-		je JUG_NEGRAS
-		jmp MenuPrincipal
+		jmp VolverTurno ;ACA MODIFIQUE
 
 	ErrorCrear:
 	    print msmError3
