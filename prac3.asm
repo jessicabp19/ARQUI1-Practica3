@@ -55,6 +55,8 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	f2 db 0b
 	col2 db 0b
 	pos2 db 0b
+	separadorComa db ','
+	separadorPC db ';'
 	tipoCoord db 0b
 	filaSelec1 db 8 dup(000b)
 	filaSelec2 db 8 dup(000b)
@@ -69,6 +71,11 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	comandoSave db 'S','A','V','E','$'
 	comandoShow db 'S','H','O','W','$'
 	extension db '.arq', '$'
+
+	char0 db '0'
+	char1 db '1'
+	char4 db '4'
+	char7 db '7'
 	msg_salir db 0ah, 0dh, '-------- PARTIDA FINALIZADA --------', '$'
 
 	msg_guardar db 0ah, 0dh, '-------- GUARDANDO PARTIDA --------', 10,13,'$'
@@ -76,7 +83,7 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	msg_guardad db 0ah, 0dh, '-------- Partida Guardada Con Exito --------', '$'
 
 	msg_generar db 0ah, 0dh, '-------- GENERANDO ARCHIVO --------', 10,13,'$'
-	infoNomArch db 0ah, 0dh, '>Nombre archivo: estadoTablero.html', '$'
+	infoNomArch db 0ah, 0dh, '>Nombre archivo: AETab.html', '$'
 	msg_generad db 0ah, 0dh, '--- Visualizacion Generada Con Exito ---', 10,13, '$'
 
 ;VARIABLES FICHERO
@@ -171,8 +178,8 @@ main proc
 		cmp tipoCoord, 0b
 		je COORD_T1
 		jmp COORD_T2
-		mov turno, 1b
-		jmp INGRESAR
+		;mov turno, 1b
+		;jmp INGRESAR
 
 	JUG_NEGRAS:
 		print turnoNegras
@@ -181,6 +188,9 @@ main proc
 		comparacion2 comandoSave, bufferLectura
 		comparacion3 comandoShow, bufferLectura
 		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3, tipoCoord
+		;cmp tipoCoord, 0b
+		;je COORD_T1
+		;jmp COORD_T2
 		mov turno, 0b
 		jmp INGRESAR
 
@@ -189,31 +199,11 @@ main proc
 		jmp VolverTurno
 
 	COORD_T2:
-		;print salto
 		print msg_coord2
 		obtenerPos col1, pos1
 		obtenerPos col2, pos2
 		findYAxis1 f1, pos1, f2, pos2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
 		jmp INGRESAR
-
-	A:
-		cmp col1, 47H
-		je B
-		jmp INGRESAR
-	B:
-		cmp fila6[6], 001b
-		je BB
-		jmp INGRESAR
-
-	BB:
-		print msg_coord1
-		cmp turno, 0b
-		je CC
-		jmp INGRESAR
-
-	CC:
-		mov fila6[6], 111b
-		jmp VolverTurno
 
 	VolverTurno:
 		cmp turno, 0b
@@ -226,9 +216,16 @@ main proc
 	SAVE:
 		print msg_guardar
 		print cinNomArch
-		;GUARDAR EL .ARQ
 		getRuta rutaArchivo
 		crearF rutaArchivo,handleFichero
+		abrirF rutaArchivo,handleFichero
+
+	SAVE_CONT:
+		imprimirArq SIZEOF fila8, separadorComa, separadorPC, fila8, char0, char1, char4, char7, handleFichero
+		imprimirArq SIZEOF fila7, separadorComa, separadorPC, fila7, char0, char1, char4, char7, handleFichero
+		imprimirArq SIZEOF fila6, separadorComa, separadorPC, fila6, char0, char1, char4, char7, handleFichero
+		imprimirArq SIZEOF fila5, separadorComa, separadorPC, fila5, char0, char1, char4, char7, handleFichero
+		cerrarF handleFichero
 		print msg_guardad
 		jmp VolverTurno
 
@@ -272,6 +269,7 @@ main proc
 
 	MENSAJE:
 		;print saltoLinea
+		;mov turno, 1b
 	    print msg_movimiento
 	    getChar
 	    jmp INGRESAR

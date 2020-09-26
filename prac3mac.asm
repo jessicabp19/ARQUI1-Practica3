@@ -113,6 +113,55 @@
 			POP SI
 		endm
 
+	imprimirArq macro len, sc, spc, f, char0, char1, char4, char7, handleFichero
+		LOCAL DO, VERFN, VERFB, VERVB, VERVN, FIN, COMPARE
+		PUSH SI
+		PUSH AX
+		xor si, si
+		
+		mov al, [f+si]		;AQUI
+		cmp al, 001b
+		je VERFB
+		cmp al, 100b
+		je VERFN
+		cmp al, 000b
+		je VERVB
+		jmp VERVN
+
+		DO:
+			escribirF SIZEOF sc, sc, handleFichero
+			mov al, [f+si]		;AQUI
+			cmp al, 001b
+			je VERFB
+			cmp al, 100b
+			je VERFN
+			cmp al, 000b
+			je VERVB
+			jmp VERVN
+
+		COMPARE:
+			inc si 				;AQUI
+			cmp si, len 		;AQUI
+			jb DO
+			jmp FIN
+
+		VERFB:
+			escribirF SIZEOF char1, char1, handleFichero
+			jmp COMPARE
+		VERFN:
+			escribirF SIZEOF char4, char4, handleFichero
+			jmp COMPARE	
+		VERVB:
+			escribirF SIZEOF char0, char0, handleFichero
+			jmp COMPARE
+		VERVN:
+			escribirF SIZEOF char7, char7, handleFichero
+			jmp COMPARE
+		FIN:
+			escribirF SIZEOF spc, spc, handleFichero
+			POP AX
+			POP SI
+		endm
 
 ;********************* MACROS PARA MANEJO DE FICHEROS *******************
 
@@ -146,6 +195,15 @@
 		int 21h
 		mov handle,ax
 		jc ErrorAbrir
+	endm
+
+	leerF macro numbytes,buffer,handle
+		mov ah,3fh
+		mov bx,handle
+		mov cx,numbytes
+		lea dx,buffer
+		int 21h
+		jc ErrorLeer
 	endm
 
 	cerrarF macro handle
@@ -540,7 +598,7 @@
 		;	findYAxis2 f, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
 		;	jmp FIN
 		M1:
-			mov f[si], 000b
+			mov f[si], 111b
 			jmp FIN
 
 		FIN:	
