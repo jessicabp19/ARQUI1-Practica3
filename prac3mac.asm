@@ -111,7 +111,7 @@
 			escribirF SIZEOF ctr, ctr, handleFichero
 			POP AX
 			POP SI
-		endm
+	endm
 
 	imprimirArq macro len, sc, spc, f, char0, char1, char4, char7, handleFichero
 		LOCAL DO, VERFN, VERFB, VERVB, VERVN, FIN, COMPARE
@@ -161,7 +161,188 @@
 			escribirF SIZEOF spc, spc, handleFichero
 			POP AX
 			POP SI
-		endm
+	endm
+
+	obtenerBinario macro col, pos
+		LOCAL P1, P2, P3, P4, FIN ; P5, P6, P7, P8,
+
+		mov al, col
+		cmp al, '0'
+		je P1
+		cmp al, '1'
+		je P2
+		cmp al, '4'
+		je P3
+		cmp al, '7'
+		je P4
+		jmp ErrorAbrir
+
+		P1:
+			mov pos, 000b
+			jmp FIN
+		P2:
+			mov pos, 001b
+			jmp FIN
+		P3:
+			mov pos, 100b
+			jmp FIN
+		P4:
+			mov pos, 111b
+			jmp FIN
+		;P5:
+		;	mov pos, 100b
+		;	jmp FIN
+		;P6:
+		;	mov pos, 101b
+		;	jmp FIN
+
+		FIN:
+			;print pos
+	endm
+
+	procesoCarga macro buffer, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, temp, bin;, m1, m2, m3, tipoCoord
+		LOCAL DO1, DO2, DO3, DO4, LETRA1, NUM1, SET_INDICE, SET_SUBINDICE, SET_INDICE2, SET_SUBINDICE2, SET_INDICE3, SET_SUBINDICE3, LETRA2, NUM2, ULTIMO, FIN
+
+		PUSH SI
+		PUSH AX
+		PUSH DI
+		xor di, di
+		xor si, si
+		
+		DO1:
+			;mov tipoCoord, 0b
+			mov al, buffer[si]
+			cmp al, '0'
+			je LETRA1
+			cmp al, '1'
+			je LETRA1
+			cmp al, '4'
+			je LETRA1
+			cmp al, '7'
+			je LETRA1
+			cmp al, ','
+			je SET_INDICE
+			cmp al, ';'
+			je SET_SUBINDICE
+			jmp ERROR_COORD
+		LETRA1:
+			inc si
+			mov temp, al
+			obtenerBinario temp, bin
+			mov al, bin
+			mov fila8[di], al
+			inc di
+			jmp DO1
+		SET_INDICE:
+			inc si
+			jmp DO1
+		SET_SUBINDICE:
+			inc si
+			xor di, di
+			jmp DO2
+
+		DO2:
+			;inc si
+			mov al, buffer[si]
+			cmp al, '0'
+			je NUM1
+			cmp al, '1'
+			je NUM1
+			cmp al, '4'
+			je NUM1
+			cmp al, '7'
+			je NUM1
+			cmp al, ','
+			je SET_INDICE2
+			cmp al, ';'
+			je SET_SUBINDICE2
+			jmp ERROR_COORD
+		NUM1:
+			mov temp, al
+			obtenerBinario temp, bin
+			mov al, bin
+			mov fila7[di], al
+			inc si
+			inc di
+			jmp DO2
+		SET_INDICE2:
+			inc si
+			jmp DO2
+		SET_SUBINDICE2:
+			inc si
+			xor di, di
+			jmp DO3	
+
+		DO3:
+			;inc si
+			mov al, buffer[si]
+			cmp al, '0'
+			je LETRA2
+			cmp al, '1'
+			je LETRA2
+			cmp al, '4'
+			je LETRA2
+			cmp al, '7'
+			je LETRA2
+			cmp al, ','
+			je SET_INDICE3
+			cmp al, ';'
+			je SET_SUBINDICE3
+			jmp ERROR_COORD
+		LETRA2:
+			mov temp, al
+			obtenerBinario temp, bin
+			mov al, bin
+			mov fila6[di], al
+			inc si
+			inc di
+			jmp DO3
+		SET_INDICE3:
+			inc si
+			jmp DO3
+		SET_SUBINDICE3:
+			inc si
+			xor di, di
+			jmp FIN	
+
+		DO4:
+			mov al, [buffer+si]
+			cmp al, '1'
+			je NUM2
+			cmp al, '2'
+			je NUM2
+			cmp al, '3'
+			je NUM2
+			cmp al, '4'
+			je NUM2
+			cmp al, '5'
+			je NUM2
+			cmp al, '6'
+			je NUM2
+			cmp al, '7'
+			je NUM2
+			cmp al, '8'
+			je NUM2
+			jmp ERROR_COORD
+
+
+
+		NUM2:
+			inc si
+			mov f2, al
+			jmp ULTIMO
+
+		ULTIMO:
+			mov al, [buffer+si]
+			cmp al, 24h;'$'
+			je FIN
+			jmp ERROR_COORD
+
+		FIN:
+			POP DI
+			POP AX
+			POP SI
+	endm	
 
 ;********************* MACROS PARA MANEJO DE FICHEROS *******************
 

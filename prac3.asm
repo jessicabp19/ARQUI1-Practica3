@@ -55,6 +55,8 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	f2 db 0b
 	col2 db 0b
 	pos2 db 0b
+	temp db '$'
+	bin db 000b
 	separadorComa db ','
 	separadorPC db ';'
 	tipoCoord db 0b
@@ -119,7 +121,8 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 
 ;VARIABLES CARGAR JUEGO
 	msg_carga db 0ah, 0dh, '-------- CARGANDO JUEGO --------', 10,13, '$'
-	msg6 db 0ah, 0dh, '-------- CARGANDO JUEGO6 --------', '$'
+	cinNomArchCarga db 0ah, 0dh, '>Ingrese nombre para cargar (.arq): ', '$'
+	msg_cargad db 0ah, 0dh, '-------- Partida Cargada Con Exito --------', '$'
 
 	m1 db 0ah, 0dh, '-------- 1 --------', '$'
 	m2 db 0ah, 0dh, '-------- 2 --------', '$'
@@ -303,6 +306,15 @@ main proc
 ;-----------------------------CARGAR-----------------------------
 	CARGAR:
 		print msg_carga
+		print cinNomArchCarga
+		getRuta rutaArchivo
+		abrirF rutaArchivo,handleFichero
+		leerF SIZEOF bufferLectura, bufferLectura, handleFichero
+		;PROCESO DE CARGA
+		procesoCarga bufferLectura, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, temp, bin ;f1, col1, f2, col2, bufferLectura;  m1, m2, m3, tipoCoord
+
+		cerrarF handleFichero
+		print msg_cargad
 		getChar
 		jmp MenuPrincipal
 
