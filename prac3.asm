@@ -41,8 +41,6 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	fila6 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
 	fila5 db 000b, 111b, 000b, 111b, 000b, 111b, 000b, 111b
 	fila4 db 111b, 000b, 111b, 000b, 111b, 000b, 111b, 000b
-	;fila5 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
-	;fila4 db 000b, 000b, 000b, 000b, 000b, 000b, 000b, 000b
 	fila3 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b
 	fila2 db 100b, 000b, 100b, 000b, 100b, 000b, 100b, 000b
 	fila1 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b 
@@ -116,6 +114,7 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	ReinaN db 0ah, 0dh, 9, '		<td bgcolor="brown"><img src="Rn.png"></td>', 00h
 	VacioB db 0ah, 0dh, 9, '		<td bgcolor="white" width=47px; height=125px;></td>', 00h
 	VacioN db 0ah, 0dh, 9, '		<td bgcolor="brown" width=47px; height=125px;></td>', 00h
+
 	;VacioB db 0ah, 0dh, '<td bgcolor="white"><img src="Vb.png"></td>', '$'
 	;VacioN db 0ah, 0dh, '<td bgcolor="black"><img src="Vn.png"></td>', '$'
 
@@ -143,17 +142,24 @@ main proc
 		print menuOpciones
 		getChar
 		cmp al, '1'
-		je INGRESAR
+		je NUEVO
 		cmp al, '2'
 		je CARGAR
 		cmp al, '3'
 		je SALIR
 		;else
-		jmp MenuPrincipal
+		jmp NUEVO
 
 ;-----------------------------JUEGO--------------------------------
-	INGRESAR:
+	
+	NUEVO:
 		print msg_nvo
+
+		;LIMPIAR
+		jmp INGRESAR
+
+	INGRESAR:
+		
 		imprimir SIZEOF fila8, fb, fn, y8, vc, fila8, ln, saltoLinea
 		imprimir SIZEOF fila7, fb, fn, y7, vc, fila7, ln, saltoLinea
 		imprimir SIZEOF fila6, fb, fn, y6, vc, fila6, ln, saltoLinea
@@ -191,11 +197,11 @@ main proc
 		comparacion2 comandoSave, bufferLectura
 		comparacion3 comandoShow, bufferLectura
 		verifCoord f1, col1, f2, col2, bufferLectura, m1, m2, m3, tipoCoord
-		;cmp tipoCoord, 0b
-		;je COORD_T1
-		;jmp COORD_T2
-		mov turno, 0b
-		jmp INGRESAR
+		cmp tipoCoord, 0b
+		je COORD_T1
+		jmp COORD_T2
+		;mov turno, 0b
+		;jmp INGRESAR
 
 	COORD_T1:
 		print msg_coord1
@@ -277,10 +283,19 @@ main proc
 	MENSAJE:
 		;print saltoLinea
 		;mov turno, 1b
-	    print msg_movimiento
+	    ;print msg_movimiento
+	    print m1
 	    getChar
+
 	    jmp INGRESAR
 
+	MENSAJE_Corecto:
+		;print saltoLinea
+		;mov turno, 1b
+	    print msg_movimiento
+	    getChar
+
+	    jmp INGRESAR
 	
 ;----------------------------ERRORES-------------------------------
 	ERROR_COORD:
@@ -316,11 +331,11 @@ main proc
 		leerF SIZEOF bufferLectura, bufferLectura, handleFichero
 		;PROCESO DE CARGA
 		procesoCarga bufferLectura, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, temp, bin ;f1, col1, f2, col2, bufferLectura;  m1, m2, m3, tipoCoord
-
 		cerrarF handleFichero
 		print msg_cargad
 		getChar
-		jmp MenuPrincipal
+		mov turno, 0b
+		jmp INGRESAR
 
 	SALIR:
 		mov ah, 4ch
