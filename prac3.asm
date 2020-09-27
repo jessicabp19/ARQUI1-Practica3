@@ -212,6 +212,22 @@ main proc
 		obtenerPos col1, pos1
 		obtenerPos col2, pos2
 		findYAxis1 f1, pos1, f2, pos2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+		findYAxis2 f1, pos1, f2, pos2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+		jmp CAMBIAR_TURNO
+		;jmp INGRESAR
+
+	CAMBIAR_TURNO:
+		cmp turno, 1b
+		je A_BLANCAS
+		cmp turno, 0b
+		je A_NEGRAS
+
+	A_BLANCAS:
+		mov turno, 0b
+		jmp INGRESAR
+
+	A_NEGRAS:
+		mov turno, 1b
 		jmp INGRESAR
 
 	VolverTurno:

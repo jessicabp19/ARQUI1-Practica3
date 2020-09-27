@@ -855,7 +855,7 @@
 		MOV DL, pos1
 		MOV DH, 0
 		MOV SI, DX
-		;je VALIDACION1
+		je M1;ANTES NO ESTABA
 
 		VALIDACION1:
 			cmp turno, 0b
@@ -875,10 +875,10 @@
 
 		M1:
 			mov f[si], 111b
-			jmp M2
+			jmp FIN;M2
 
 		M2:
-			findYAxis2 f, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
+			;findYAxis2 f, pos1, f2, col2, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, turno
 			jmp FIN
 
 		FIN:	
