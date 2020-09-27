@@ -228,6 +228,10 @@ main proc
 		imprimirArq SIZEOF fila7, separadorComa, separadorPC, fila7, char0, char1, char4, char7, handleFichero
 		imprimirArq SIZEOF fila6, separadorComa, separadorPC, fila6, char0, char1, char4, char7, handleFichero
 		imprimirArq SIZEOF fila5, separadorComa, separadorPC, fila5, char0, char1, char4, char7, handleFichero
+		imprimirArq SIZEOF fila4, separadorComa, separadorPC, fila4, char0, char1, char4, char7, handleFichero
+		imprimirArq SIZEOF fila3, separadorComa, separadorPC, fila3, char0, char1, char4, char7, handleFichero
+		imprimirArq SIZEOF fila2, separadorComa, separadorPC, fila2, char0, char1, char4, char7, handleFichero
+		imprimirArq SIZEOF fila1, separadorComa, separadorPC, fila1, char0, char1, char4, char7, handleFichero
 		cerrarF handleFichero
 		print msg_guardad
 		jmp VolverTurno

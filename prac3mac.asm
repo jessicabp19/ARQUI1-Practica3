@@ -13,7 +13,6 @@
 		LOCAL DO, VERFN, VERFB, VERVC, FIN, COMPARE
 		;print ln
 		print y
-
 		PUSH SI
 		PUSH AX
 		xor si, si
@@ -29,7 +28,6 @@
 			cmp si, len 		;AQUI
 			jb DO
 			jmp FIN
-
 		VERFB:
 			print fb
 			jmp COMPARE
@@ -39,7 +37,6 @@
 		VERVC:
 			print vc
 			jmp COMPARE
-		
 		FIN:
 			POP AX
 			POP SI
@@ -50,7 +47,6 @@
 		LOCAL CONTINUE, FIN
 		PUSH SI
 		PUSH AX
-
 		xor si, si
 		CONTINUE:
 			getChar
@@ -59,11 +55,9 @@
 			mov buffer[si], al
 			inc si
 			jmp CONTINUE
-
 		FIN:
 			mov al, '$'
 			mov buffer[si], al
-
 		POP AX
 		POP SI
 	endm
@@ -88,13 +82,11 @@
 			cmp al, 000b
 			je VERVB
 			jmp VERVN
-
 		COMPARE:
 			inc si 				;AQUI
 			cmp si, len 		;AQUI
 			jb DO
 			jmp FIN
-
 		VERFB:
 			escribirF SIZEOF fb, fb, handleFichero
 			jmp COMPARE
@@ -118,7 +110,7 @@
 		PUSH SI
 		PUSH AX
 		xor si, si
-		
+
 		mov al, [f+si]		;AQUI
 		cmp al, 001b
 		je VERFB
@@ -138,13 +130,11 @@
 			cmp al, 000b
 			je VERVB
 			jmp VERVN
-
 		COMPARE:
 			inc si 				;AQUI
 			cmp si, len 		;AQUI
 			jb DO
 			jmp FIN
-
 		VERFB:
 			escribirF SIZEOF char1, char1, handleFichero
 			jmp COMPARE
@@ -201,16 +191,13 @@
 	endm
 
 	procesoCarga macro buffer, fila8, fila7, fila6, fila5, fila4, fila3, fila2, fila1, temp, bin;, m1, m2, m3, tipoCoord
-		LOCAL DO1, DO2, DO3, DO4, LETRA1, NUM1, SET_INDICE, SET_SUBINDICE, SET_INDICE2, SET_SUBINDICE2, SET_INDICE3, SET_SUBINDICE3, LETRA2, NUM2, ULTIMO, FIN
-
+		LOCAL DO1,DO2,DO3,DO4,DO5,DO6,DO7,DO8, LETRA1,NUM1,SET_INDICE,SET_SUBINDICE,S2,SS2,S3,SS3,S4,SS4, LETRA2,NUM2, S5,SS5,S6,SS6, L3,N3,L4,N4, S7,SS7,S8,SS8, FIN
 		PUSH SI
 		PUSH AX
 		PUSH DI
 		xor di, di
 		xor si, si
-		
 		DO1:
-			;mov tipoCoord, 0b
 			mov al, buffer[si]
 			cmp al, '0'
 			je LETRA1
@@ -242,7 +229,6 @@
 			jmp DO2
 
 		DO2:
-			;inc si
 			mov al, buffer[si]
 			cmp al, '0'
 			je NUM1
@@ -253,9 +239,9 @@
 			cmp al, '7'
 			je NUM1
 			cmp al, ','
-			je SET_INDICE2
+			je S2
 			cmp al, ';'
-			je SET_SUBINDICE2
+			je SS2
 			jmp ERROR_COORD
 		NUM1:
 			mov temp, al
@@ -265,16 +251,15 @@
 			inc si
 			inc di
 			jmp DO2
-		SET_INDICE2:
+		S2:
 			inc si
 			jmp DO2
-		SET_SUBINDICE2:
+		SS2:
 			inc si
 			xor di, di
 			jmp DO3	
 
 		DO3:
-			;inc si
 			mov al, buffer[si]
 			cmp al, '0'
 			je LETRA2
@@ -285,9 +270,9 @@
 			cmp al, '7'
 			je LETRA2
 			cmp al, ','
-			je SET_INDICE3
+			je S3
 			cmp al, ';'
-			je SET_SUBINDICE3
+			je SS3
 			jmp ERROR_COORD
 		LETRA2:
 			mov temp, al
@@ -297,47 +282,165 @@
 			inc si
 			inc di
 			jmp DO3
-		SET_INDICE3:
+		S3:
 			inc si
 			jmp DO3
-		SET_SUBINDICE3:
+		SS3:
 			inc si
 			xor di, di
-			jmp FIN	
-
+			jmp DO4
 		DO4:
 			mov al, [buffer+si]
+			cmp al, '0'
+			je NUM2
 			cmp al, '1'
-			je NUM2
-			cmp al, '2'
-			je NUM2
-			cmp al, '3'
 			je NUM2
 			cmp al, '4'
 			je NUM2
-			cmp al, '5'
-			je NUM2
-			cmp al, '6'
-			je NUM2
 			cmp al, '7'
 			je NUM2
-			cmp al, '8'
-			je NUM2
+			cmp al, ','
+			je S4
+			cmp al, ';'
+			je SS4
 			jmp ERROR_COORD
-
-
-
 		NUM2:
+			mov temp, al
+			obtenerBinario temp, bin
+			mov al, bin
+			mov fila5[di], al
 			inc si
-			mov f2, al
-			jmp ULTIMO
+			inc di
+			jmp DO4
+		S4:
+			inc si
+			jmp DO4
+		SS4:
+			inc si
+			xor di, di
+			jmp DO5	
 
-		ULTIMO:
-			mov al, [buffer+si]
-			cmp al, 24h;'$'
-			je FIN
+		DO5:
+			mov al, buffer[si]
+			cmp al, '0'
+			je L3
+			cmp al, '1'
+			je L3
+			cmp al, '4'
+			je L3
+			cmp al, '7'
+			je L3
+			cmp al, ','
+			je S5
+			cmp al, ';'
+			je SS5
 			jmp ERROR_COORD
+		L3:
+			mov temp, al
+			obtenerBinario temp, bin
+			mov al, bin
+			mov fila4[di], al
+			inc si
+			inc di
+			jmp DO5
+		S5:
+			inc si
+			jmp DO5
+		SS5:
+			inc si
+			xor di, di
+			jmp DO6
+		DO6:
+			mov al, [buffer+si]
+			cmp al, '0'
+			je N3
+			cmp al, '1'
+			je N3
+			cmp al, '4'
+			je N3
+			cmp al, '7'
+			je N3
+			cmp al, ','
+			je S6
+			cmp al, ';'
+			je SS6
+			jmp ERROR_COORD
+		N3:
+			mov temp, al
+			obtenerBinario temp, bin
+			mov al, bin
+			mov fila3[di], al
+			inc si
+			inc di
+			jmp DO6
+		S6:
+			inc si
+			jmp DO6
+		SS6:
+			inc si
+			xor di, di
+			jmp DO7
 
+		DO7:
+			mov al, buffer[si]
+			cmp al, '0'
+			je L4
+			cmp al, '1'
+			je L4
+			cmp al, '4'
+			je L4
+			cmp al, '7'
+			je L4
+			cmp al, ','
+			je S7
+			cmp al, ';'
+			je SS7
+			jmp ERROR_COORD
+		L4:
+			mov temp, al
+			obtenerBinario temp, bin
+			mov al, bin
+			mov fila2[di], al
+			inc si
+			inc di
+			jmp DO7
+		S7:
+			inc si
+			jmp DO7
+		SS7:
+			inc si
+			xor di, di
+			jmp DO8
+		DO8:
+			mov al, [buffer+si]
+			cmp al, '0'
+			je N4
+			cmp al, '1'
+			je N4
+			cmp al, '4'
+			je N4
+			cmp al, '7'
+			je N4
+			cmp al, ','
+			je S8
+			cmp al, ';'
+			je SS8
+			jmp ERROR_COORD
+		N4:
+			mov temp, al
+			obtenerBinario temp, bin
+			mov al, bin
+			mov fila1[di], al
+			inc si
+			inc di
+			jmp DO8
+		S8:
+			inc si
+			jmp DO8
+		SS8:
+			inc si
+			xor di, di
+			jmp FIN	
 		FIN:
 			POP DI
 			POP AX
@@ -786,16 +889,6 @@
 
 			POP DX
 			POP SI
-	endm
-
-	
-
-;************************* MACROS TEMPORALES *****************************
-
-	printChar macro char
-		mov ah, 02h
-		mov dl, char
-		int 21h
 	endm
 
 	
