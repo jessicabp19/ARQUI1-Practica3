@@ -45,6 +45,15 @@ menuOpciones db 0ah, '========== MENU PRINCIPAL ==========', 10,13,'1) Iniciar J
 	fila2 db 100b, 000b, 100b, 000b, 100b, 000b, 100b, 000b
 	fila1 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b 
 
+	fil8 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
+	fil7 db 000b, 001b, 000b, 001b, 000b, 001b, 000b, 001b
+	fil6 db 001b, 000b, 001b, 000b, 001b, 000b, 001b, 000b
+	fil5 db 000b, 111b, 000b, 111b, 000b, 111b, 000b, 111b
+	fil4 db 111b, 000b, 111b, 000b, 111b, 000b, 111b, 000b
+	fil3 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b
+	fil2 db 100b, 000b, 100b, 000b, 100b, 000b, 100b, 000b
+	fil1 db 000b, 100b, 000b, 100b, 000b, 100b, 000b, 100b 
+
 ;DETALLES JUEGO
 	turno db 0b
 	f1 db 0b
@@ -154,8 +163,16 @@ main proc
 	
 	NUEVO:
 		print msg_nvo
-
 		;LIMPIAR
+		limpiar SIZEOF fil8, fila8, fil8
+		limpiar SIZEOF fil8, fila7, fil7
+		limpiar SIZEOF fil8, fila6, fil6
+		limpiar SIZEOF fil8, fila5, fil5
+		limpiar SIZEOF fil8, fila4, fil4
+		limpiar SIZEOF fil8, fila3, fil3
+		limpiar SIZEOF fil8, fila2, fil2
+		limpiar SIZEOF fil8, fila1, fil1
+		mov turno, 0b
 		jmp INGRESAR
 
 	INGRESAR:

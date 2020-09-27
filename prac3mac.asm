@@ -445,6 +445,25 @@
 			POP SI
 	endm	
 
+	limpiar macro len, filaOriginal, filaPlantilla
+		LOCAL DO, COMPARE, FIN
+		PUSH SI
+		PUSH AX
+		xor si, si
+		DO:
+			mov al, [filaPlantilla+si]		;AQUI
+			mov filaOriginal[si], al
+			jmp COMPARE
+		COMPARE:
+			inc si 				;AQUI
+			cmp si, len 		;AQUI
+			jb DO
+			jmp FIN
+		FIN:
+			POP AX
+			POP SI
+	endm
+
 ;********************* MACROS PARA MANEJO DE FICHEROS *******************
 
 	getRuta macro buffer
